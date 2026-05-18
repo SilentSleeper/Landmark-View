@@ -16,3 +16,7 @@ On the technical side, the backend is built with Spring Boot and Spring Security
 ## Figma Wireframe
 
 https://www.figma.com/design/UpcF7HtdAHaKhUFdyBhnF0/Bucharest-Landmarks-%E2%80%94-Wireframes?node-id=0-1&t=ruRbOyH54jEa3Oqi-1
+
+## Trello
+
+https://trello.com/invite/b/6a0b3a722627d85275efb513/ATTI56a1cb55647edd37984254d058c49ce5F96696E2/bucharest-landmarks
