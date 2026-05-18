@@ -12,3 +12,7 @@ On the technical side, the backend is built with Spring Boot and Spring Security
 2. As an admin, I want to add a new landmark by dropping a pin on the map and filling in its name, description, and photos, so that the places I know about become discoverable for everyone else on the site.
 
 3. As a registered user, I want to leave comments and reply to other people on a landmark's page, so that I can share my own experience visiting it or ask questions and build a small discussion around each place.
+
+## Figma Wireframe
+
+https://www.figma.com/design/UpcF7HtdAHaKhUFdyBhnF0/Bucharest-Landmarks-%E2%80%94-Wireframes?node-id=0-1&t=ruRbOyH54jEa3Oqi-1
