@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Landmarks</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="profile-content" style="max-width: 1000px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2>Manage Landmarks</h2>
+            <a th:href="@{/admin/landmarks/new}" class="btn btn-primary">Add New Landmark</a>
+        </div>
+
+        <div class="card" style="max-width: 100%; padding: 0; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead style="background: var(--bg-color); border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th style="padding: 1rem; font-weight: 600;">Name</th>
+                        <th style="padding: 1rem; font-weight: 600;">Category</th>
+                        <th style="padding: 1rem; font-weight: 600;">Coordinates</th>
+                        <th style="padding: 1rem; font-weight: 600;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="landmark : ${landmarks}" style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;" th:text="${landmark.name}">Name</td>
+                        <td style="padding: 1rem;" th:text="${landmark.category}">Category</td>
+                        <td style="padding: 1rem;">
+                            <span th:text="${landmark.latitude}">Lat</span>, <span th:text="${landmark.longitude}">Lng</span>
+                        </td>
+                        <td style="padding: 1rem;">
+                            <a th:href="@{/admin/landmarks/edit/{id}(id=${landmark.id})}" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</a>
+                            <a th:href="@{/admin/landmarks/delete/{id}(id=${landmark.id})}" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #ef4444; border-color: #ef4444;" onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(landmarks)}">
+                        <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No landmarks found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

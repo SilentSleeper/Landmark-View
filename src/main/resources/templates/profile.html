@@ -14,7 +14,7 @@
             <div class="profile-info">
                 <h1 th:text="${user != null ? user.displayName : 'Andrei Popa'}">Andrei Popa</h1>
                 <p th:text="${user != null ? user.email : 'andrei.popa@example.com'}">andrei.popa@example.com</p>
-                <p>Member since May 2026 · 18 comments</p>
+                <p>Member since <span th:text="${#temporals.format(#temporals.createNow(), 'MMMM yyyy')}">May 2026</span> · <span th:text="${comments != null ? comments.size() : 0}">0</span> comments</p>
             </div>
             <div style="margin-left: auto;">
                 <button class="btn btn-outline">Edit profile</button>
@@ -25,31 +25,19 @@
     <div class="profile-content">
         <h3 style="margin-bottom: 1.5rem;">My comments</h3>
         
-        <div class="comment-card">
-            <div>
-                <h4>Ateneul Român</h4>
-                <p>Best acoustics in the city. Don't miss a concert here.</p>
-                <span class="time">1 week ago</span>
+        <div th:if="${comments != null and not #lists.isEmpty(comments)}">
+            <div th:each="comment : ${comments}" class="comment-card">
+                <div>
+                    <h4 th:text="${comment.landmark.name}">Ateneul Român</h4>
+                    <p th:text="${comment.text}">Best acoustics in the city.</p>
+                    <span class="time" th:text="${#temporals.format(comment.createdAt, 'dd MMM yyyy, HH:mm')}">1 week ago</span>
+                </div>
+                <span style="color: var(--text-muted);">→</span>
             </div>
-            <span style="color: var(--text-muted);">→</span>
         </div>
-
-        <div class="comment-card">
-            <div>
-                <h4>Palatul Parlamentului</h4>
-                <p>Worth a guided tour — the scale is unreal.</p>
-                <span class="time">3 weeks ago</span>
-            </div>
-            <span style="color: var(--text-muted);">→</span>
-        </div>
-
-        <div class="comment-card">
-            <div>
-                <h4>Cărturești Carusel</h4>
-                <p>Came for the photos, stayed for the books.</p>
-                <span class="time">1 month ago</span>
-            </div>
-            <span style="color: var(--text-muted);">→</span>
+        
+        <div th:if="${comments == null or #lists.isEmpty(comments)}">
+            <p style="color: var(--text-muted);">You haven't posted any comments yet.</p>
         </div>
     </div>
 </body>

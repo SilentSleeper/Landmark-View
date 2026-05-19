@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>București Landmarks Map</title>
+    <!-- CSRF Meta Tags for AJAX POST -->
+    <meta th:if="${_csrf}" name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:if="${_csrf}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,13 +17,14 @@
 
     <div class="map-layout">
         <div class="map-controls">
-            <input type="text" class="form-control search-input" placeholder="Search landmarks, neighborhoods...">
+            <input type="text" class="form-control search-input" placeholder="Search landmarks, neighborhoods..." onkeyup="filterMap()">
             <div class="filter-chips">
-                <div class="chip active">All</div>
-                <div class="chip">Churches</div>
-                <div class="chip">Palaces</div>
-                <div class="chip">Museums</div>
-                <div class="chip">Monuments</div>
+                <div class="chip active" onclick="setFilter(this, 'All')">All</div>
+                <div class="chip" onclick="setFilter(this, 'Church')">Churches</div>
+                <div class="chip" onclick="setFilter(this, 'Palace')">Palaces</div>
+                <div class="chip" onclick="setFilter(this, 'Museum')">Museums</div>
+                <div class="chip" onclick="setFilter(this, 'Monument')">Monuments</div>
+                <div class="chip" onclick="setFilter(this, 'Park')">Parks</div>
             </div>
         </div>
 
@@ -26,41 +32,30 @@
             <!-- Map Container -->
             <div id="map"></div>
 
-            <!-- Floating Side Panel (Hidden by default) -->
+            <!-- Floating Side Panel -->
             <div class="side-panel" id="sidePanel">
                 <button class="close-panel" onclick="closePanel()">×</button>
-                <img src="https://images.unsplash.com/photo-1584897262100-2f9543888365?auto=format&fit=crop&w=400&q=80" alt="Landmark photo" class="panel-image" id="panelImage">
+                <img src="" alt="Landmark photo" class="panel-image" id="panelImage">
                 <div class="panel-content">
-                    <h3 class="panel-title" id="panelTitle">Ateneul Român</h3>
-                    <p class="panel-meta" id="panelMeta">Concert hall · Calea Victoriei · 1888</p>
-                    <p class="panel-desc" id="panelDesc">
-                        The Romanian Athenaeum is a concert hall in the center of Bucharest, Romania, and a landmark of the Romanian capital city.
-                    </p>
+                    <h3 class="panel-title" id="panelTitle">Landmark Title</h3>
+                    <p class="panel-meta" id="panelMeta">Category · Coordinates</p>
+                    <p class="panel-desc" id="panelDesc">Description</p>
 
                     <div class="comments-section">
-                        <h4>Comments (12)</h4>
+                        <h4>Comments (<span id="commentCount">0</span>)</h4>
                         
-                        <div class="comment">
-                            <div class="avatar"></div>
-                            <div class="comment-body">
-                                <span class="comment-author">Maria I.</span><span class="comment-time">2 days ago</span>
-                                <p class="comment-text">Visited on a Sunday morning — almost empty, peaceful.</p>
-                            </div>
+                        <div id="commentsList">
+                            <!-- Comments injected here via JS -->
                         </div>
 
-                        <div class="comment">
-                            <div class="avatar"></div>
-                            <div class="comment-body">
-                                <span class="comment-author">Radu P.</span><span class="comment-time">1 week ago</span>
-                                <p class="comment-text">Best acoustics in the city. Don't miss a concert here.</p>
-                            </div>
-                        </div>
-
-                        <div class="comment-input-area">
-                            <textarea placeholder="Add a comment..."></textarea>
+                        <div class="comment-input-area" sec:authorize="isAuthenticated()">
+                            <textarea id="newCommentText" placeholder="Add a comment..."></textarea>
                             <div class="actions">
-                                <button class="btn btn-primary" style="padding: 0.25rem 1rem; font-size: 0.75rem;">Post</button>
+                                <button class="btn btn-primary" style="padding: 0.25rem 1rem; font-size: 0.75rem;" onclick="postComment()">Post</button>
                             </div>
+                        </div>
+                        <div class="comment-input-area" sec:authorize="!isAuthenticated()" style="text-align: center; border: none;">
+                            <p style="font-size: 0.875rem; color: var(--text-muted);"><a th:href="@{/login}">Log in</a> to post a comment.</p>
                         </div>
                     </div>
                 </div>
@@ -72,15 +67,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Initialize Map
-        const map = L.map('map').setView([44.4268, 26.1025], 13); // Bucharest coords
-
+        const map = L.map('map').setView([44.4268, 26.1025], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        // Custom red dot icon
         const redIcon = L.divIcon({
             className: 'custom-div-icon',
             html: "<div style='background-color:#ef4444;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 4px rgba(0,0,0,0.3);'></div>",
@@ -88,28 +81,99 @@
             iconAnchor: [8, 8]
         });
 
-        // Add dummy markers
-        const markers = [
-            { pos: [44.4413, 26.0973], title: "Ateneul Român" },
-            { pos: [44.4275, 26.0873], title: "Palatul Parlamentului" },
-            { pos: [44.4325, 26.1039], title: "Centrul Vechi" }
-        ];
+        let currentActiveLandmarkId = null;
+        let allMarkers = [];
+        let allLandmarksData = [];
+        let currentFilter = 'All';
 
-        markers.forEach(m => {
-            const marker = L.marker(m.pos, { icon: redIcon }).addTo(map);
-            marker.on('click', () => openPanel(m.title));
-        });
+        // Load Markers from API
+        fetch('/api/landmarks')
+            .then(res => res.json())
+            .then(data => {
+                allLandmarksData = data;
+                renderMarkers(data);
+            });
 
-        const panel = document.getElementById('sidePanel');
-        const panelTitle = document.getElementById('panelTitle');
+        function renderMarkers(data) {
+            allMarkers.forEach(m => map.removeLayer(m));
+            allMarkers = [];
 
-        function openPanel(title) {
-            panelTitle.innerText = title;
-            panel.classList.add('active');
+            data.forEach(m => {
+                if(currentFilter !== 'All' && m.category !== currentFilter) return;
+
+                const marker = L.marker([m.latitude, m.longitude], { icon: redIcon }).addTo(map);
+                marker.on('click', () => loadLandmarkDetails(m.id));
+                allMarkers.push(marker);
+            });
+        }
+
+        function setFilter(element, category) {
+            document.querySelectorAll('.filter-chips .chip').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            currentFilter = category;
+            renderMarkers(allLandmarksData);
+            closePanel();
+        }
+
+        function loadLandmarkDetails(id) {
+            currentActiveLandmarkId = id;
+            fetch('/api/landmarks/' + id)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('panelTitle').innerText = data.landmark.name;
+                    document.getElementById('panelMeta').innerText = data.landmark.category + ' · ' + data.landmark.latitude.toFixed(4) + ', ' + data.landmark.longitude.toFixed(4);
+                    document.getElementById('panelDesc').innerText = data.landmark.description;
+                    document.getElementById('panelImage').src = data.landmark.imageUrl || '';
+                    
+                    document.getElementById('commentCount').innerText = data.comments.length;
+                    
+                    const commentsList = document.getElementById('commentsList');
+                    commentsList.innerHTML = '';
+                    data.comments.forEach(c => {
+                        commentsList.innerHTML += `
+                            <div class="comment">
+                                <div class="avatar"></div>
+                                <div class="comment-body">
+                                    <span class="comment-author">${c.user.displayName}</span>
+                                    <span class="comment-time">${c.createdAt}</span>
+                                    <p class="comment-text">${c.text}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('sidePanel').classList.add('active');
+                });
         }
 
         function closePanel() {
-            panel.classList.remove('active');
+            document.getElementById('sidePanel').classList.remove('active');
+            currentActiveLandmarkId = null;
+        }
+
+        function postComment() {
+            if (!currentActiveLandmarkId) return;
+            const text = document.getElementById('newCommentText').value;
+            if (!text.trim()) return;
+
+            const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+            const headers = { 'Content-Type': 'application/json' };
+            if (token && header) headers[header] = token;
+
+            fetch('/api/landmarks/' + currentActiveLandmarkId + '/comments', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ text: text })
+            }).then(res => {
+                if (res.ok) {
+                    document.getElementById('newCommentText').value = '';
+                    loadLandmarkDetails(currentActiveLandmarkId); // Reload to show new comment
+                } else if (res.status === 401) {
+                    window.location.href = '/login';
+                }
+            });
         }
     </script>
 </body>

@@ -19,14 +19,18 @@ public class Landmark {
     private Double latitude;
     private Double longitude;
 
-    // Constructors, Getters, Setters
+    private String category;
+    private String imageUrl;
+
     public Landmark() {}
 
-    public Landmark(String name, String description, Double latitude, Double longitude) {
+    public Landmark(String name, String description, Double latitude, Double longitude, String category, String imageUrl) {
         this.name = name;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.category = category;
+        this.imageUrl = imageUrl;
     }
 
     public Long getId() { return id; }
@@ -43,4 +47,10 @@ public class Landmark {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
