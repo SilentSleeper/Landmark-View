@@ -1,14 +1,116 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>București Landmarks</title>
+    <meta charset="UTF-8">
+    <title>București Landmarks Map</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
-    <h2>Welcome to București Landmarks!</h2>
-    <p>This is a placeholder for the map.</p>
-    <div>
-        <a th:href="@{/login}">Log in</a> | 
-        <a th:href="@{/register}">Register</a>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="map-layout">
+        <div class="map-controls">
+            <input type="text" class="form-control search-input" placeholder="Search landmarks, neighborhoods...">
+            <div class="filter-chips">
+                <div class="chip active">All</div>
+                <div class="chip">Churches</div>
+                <div class="chip">Palaces</div>
+                <div class="chip">Museums</div>
+                <div class="chip">Monuments</div>
+            </div>
+        </div>
+
+        <div class="map-container-wrapper">
+            <!-- Map Container -->
+            <div id="map"></div>
+
+            <!-- Floating Side Panel (Hidden by default) -->
+            <div class="side-panel" id="sidePanel">
+                <button class="close-panel" onclick="closePanel()">×</button>
+                <img src="https://images.unsplash.com/photo-1584897262100-2f9543888365?auto=format&fit=crop&w=400&q=80" alt="Landmark photo" class="panel-image" id="panelImage">
+                <div class="panel-content">
+                    <h3 class="panel-title" id="panelTitle">Ateneul Român</h3>
+                    <p class="panel-meta" id="panelMeta">Concert hall · Calea Victoriei · 1888</p>
+                    <p class="panel-desc" id="panelDesc">
+                        The Romanian Athenaeum is a concert hall in the center of Bucharest, Romania, and a landmark of the Romanian capital city.
+                    </p>
+
+                    <div class="comments-section">
+                        <h4>Comments (12)</h4>
+                        
+                        <div class="comment">
+                            <div class="avatar"></div>
+                            <div class="comment-body">
+                                <span class="comment-author">Maria I.</span><span class="comment-time">2 days ago</span>
+                                <p class="comment-text">Visited on a Sunday morning — almost empty, peaceful.</p>
+                            </div>
+                        </div>
+
+                        <div class="comment">
+                            <div class="avatar"></div>
+                            <div class="comment-body">
+                                <span class="comment-author">Radu P.</span><span class="comment-time">1 week ago</span>
+                                <p class="comment-text">Best acoustics in the city. Don't miss a concert here.</p>
+                            </div>
+                        </div>
+
+                        <div class="comment-input-area">
+                            <textarea placeholder="Add a comment..."></textarea>
+                            <div class="actions">
+                                <button class="btn btn-primary" style="padding: 0.25rem 1rem; font-size: 0.75rem;">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize Map
+        const map = L.map('map').setView([44.4268, 26.1025], 13); // Bucharest coords
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Custom red dot icon
+        const redIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#ef4444;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 4px rgba(0,0,0,0.3);'></div>",
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // Add dummy markers
+        const markers = [
+            { pos: [44.4413, 26.0973], title: "Ateneul Român" },
+            { pos: [44.4275, 26.0873], title: "Palatul Parlamentului" },
+            { pos: [44.4325, 26.1039], title: "Centrul Vechi" }
+        ];
+
+        markers.forEach(m => {
+            const marker = L.marker(m.pos, { icon: redIcon }).addTo(map);
+            marker.on('click', () => openPanel(m.title));
+        });
+
+        const panel = document.getElementById('sidePanel');
+        const panelTitle = document.getElementById('panelTitle');
+
+        function openPanel(title) {
+            panelTitle.innerText = title;
+            panel.classList.add('active');
+        }
+
+        function closePanel() {
+            panel.classList.remove('active');
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - București Landmarks</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="profile-header">
+        <div class="profile-card">
+            <div class="profile-avatar"></div>
+            <div class="profile-info">
+                <h1 th:text="${user != null ? user.displayName : 'Andrei Popa'}">Andrei Popa</h1>
+                <p th:text="${user != null ? user.email : 'andrei.popa@example.com'}">andrei.popa@example.com</p>
+                <p>Member since May 2026 · 18 comments</p>
+            </div>
+            <div style="margin-left: auto;">
+                <button class="btn btn-outline">Edit profile</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <h3 style="margin-bottom: 1.5rem;">My comments</h3>
+        
+        <div class="comment-card">
+            <div>
+                <h4>Ateneul Român</h4>
+                <p>Best acoustics in the city. Don't miss a concert here.</p>
+                <span class="time">1 week ago</span>
+            </div>
+            <span style="color: var(--text-muted);">→</span>
+        </div>
+
+        <div class="comment-card">
+            <div>
+                <h4>Palatul Parlamentului</h4>
+                <p>Worth a guided tour — the scale is unreal.</p>
+                <span class="time">3 weeks ago</span>
+            </div>
+            <span style="color: var(--text-muted);">→</span>
+        </div>
+
+        <div class="comment-card">
+            <div>
+                <h4>Cărturești Carusel</h4>
+                <p>Came for the photos, stayed for the books.</p>
+                <span class="time">1 month ago</span>
+            </div>
+            <span style="color: var(--text-muted);">→</span>
+        </div>
+    </div>
+</body>
+</html>

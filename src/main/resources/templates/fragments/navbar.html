@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+    <nav th:fragment="navbar" class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-logo"></div>
+            București Landmarks
+        </div>
+        <div class="nav-links">
+            <a th:href="@{/}">Map</a>
+            <a href="#">About</a>
+        </div>
+        <div class="nav-actions">
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="btn btn-outline" style="margin-right: 0.5rem;">Log in</a>
+                <a th:href="@{/register}" class="btn btn-primary">Register</a>
+            </div>
+            <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 1rem;">
+                <a th:href="@{/profile}" style="font-weight: 500; color: var(--text-main);">
+                    <span sec:authentication="name">User</span>
+                </a>
+                <div class="avatar" style="width: 24px; height: 24px;"></div>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>
